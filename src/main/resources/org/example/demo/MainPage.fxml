@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.demo.Application"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <!-- 表格部分 -->
+    <TableView fx:id="playersTable" layoutX="50" layoutY="50" prefWidth="500" prefHeight="200">
+        <columns>
+            <TableColumn text="Player Name" fx:id="playerNameColumn" />
+            <TableColumn text="Board Size" fx:id="playerSizeColumn" />
+            <TableColumn text="Status" fx:id="playerStatusColumn" />
+            <TableColumn text="Score" fx:id="playerScoreColumn" />
+            <TableColumn text="Game ID" fx:id="gameIdColumn" />
+        </columns>
+    </TableView>
+
+    <!-- 按钮部分 -->
+    <Button text="Start Game" fx:id="startButton" layoutX="250" layoutY="300" onAction="#handleStartButtonClick" />
+</AnchorPane>

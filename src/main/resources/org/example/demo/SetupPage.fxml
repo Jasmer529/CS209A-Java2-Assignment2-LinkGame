@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.demo.SetUp"
+      spacing="10" alignment="CENTER"
+      prefWidth="300" prefHeight="200">
+
+    <Label text="Enter Board Dimensions:" />
+
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Rows:" />
+        <TextField fx:id="rowInput" promptText="Enter rows" />
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Columns:" />
+        <TextField fx:id="colInput" promptText="Enter columns" />
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="User:" />
+        <TextField fx:id="NAME" promptText="user" />
+    </HBox>
+
+    <Button fx:id="confirmButton" text="Confirm" onAction="#handleConfirm" />
+    <Label fx:id="errorMessageLabel" text="" style="-fx-text-fill: red;" />
+</VBox>
