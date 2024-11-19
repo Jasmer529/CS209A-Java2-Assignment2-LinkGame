@@ -26,6 +26,18 @@
   </GridPane>
 
   <HBox spacing="10" alignment="CENTER">
+    <Label text="Game Result: " />
+    <Label fx:id="gameResultLabel" text="Game in Progress" />
+  </HBox>
+
+  <HBox fx:id="scoreBox" spacing="10" alignment="CENTER" visible="false">
+    <Label text="Your Score: " />
+    <Label fx:id="yourScoreLabel" text="0" />
+    <Label text="Opponent's Score: " />
+    <Label fx:id="opponentScoreLabel" text="0" />
+  </HBox>
+
+  <HBox spacing="10" alignment="CENTER">
     <Button text="Reset" fx:id="resetButton" onAction="#handleReset"/>
   </HBox>
 </VBox>

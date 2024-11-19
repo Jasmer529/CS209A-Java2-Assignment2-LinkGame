@@ -7,6 +7,8 @@ import java.util.*;
 public class GameServer {
     private ServerSocket serverSocket;
     private Map<String, List<PlayerHandler>> waitingPlayersMap = new HashMap<>();
+
+    Map<PlayerHandler, Integer> pointMap = new HashMap<>();
     Map<String, Game> activeGames = new HashMap<>();
     List<PlayerInfo> allPlayers = new ArrayList<>();
     int count;
@@ -52,6 +54,18 @@ public class GameServer {
                     System.out.println(s);
                     info.setGameId(id);
                     info.setBoardsize(s);
+                    info.setStatus(status);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void updatePlayerStatus2(PlayerHandler player, String status, int score) {
+        synchronized (allPlayers) {
+            for (PlayerInfo info : allPlayers) {
+                if (info.getName().equals(player.getName())) {
+                    info.setScore(score);
                     info.setStatus(status);
                     break;
                 }
@@ -164,6 +178,27 @@ public class GameServer {
         }
     }
 
+    public void OverGame(String gameId){
+        Game game = activeGames.get(gameId);
+        PlayerHandler p1 = game.getPlayers().get(0);
+        PlayerHandler p2 = game.getPlayers().get(1);
+        int po1 = pointMap.get(p1);
+        int po2 = pointMap.get(p2);
+        if(po1 > po2){
+            p1.sendMessage(gameId + "GAME_OVER"+"WIN "+po1+" "+po2);
+            p2.sendMessage(gameId + "GAME_OVER"+"LOSE "+po2+" "+po1);
+        }else if(po2 > po1){
+            p2.sendMessage(gameId + "GAME_OVER"+"WIN "+po2+" "+po1);
+            p1.sendMessage(gameId + "GAME_OVER"+"LOSE "+po1+" "+po2);
+        }else {
+            p2.sendMessage(gameId + "GAME_OVER"+"PING "+po2+" "+po1);
+            p1.sendMessage(gameId + "GAME_OVER"+"PING "+po1+" "+po2);
+        }
+        updatePlayerStatus2(p1, "Game over", po1);
+        updatePlayerStatus2(p2, "Game over", po2);
+        p1.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+    }
+
     private void broadcastPlayerStatus(List<PlayerHandler> l) {
         synchronized (allPlayers) {
             for (PlayerHandler player : l) {
@@ -197,6 +232,8 @@ public class GameServer {
         public PlayerHandler opponent;
         private String boardSize;
         Game game;
+
+        int score;
 
         public PlayerHandler(Socket socket) throws IOException {
             this.socket = socket;
@@ -233,6 +270,13 @@ public class GameServer {
 //                        }
                         message = message.replace("UPDATE_BOARD","");
                         updateGameBoard(id, message);
+                        score = score + 2;
+                    }else if(message.startsWith("GAME_OVER")){
+                        System.out.println(this.score);
+                        System.out.println(opponent.score);
+                        pointMap.put(this, this.score);
+                        pointMap.put(opponent, opponent.score);
+                        OverGame(id);
                     }
                 }
             } catch (IOException e) {

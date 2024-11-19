@@ -6,10 +6,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javafx.stage.Modality;
@@ -40,6 +39,8 @@ public class Application extends javafx.application.Application {
     private TableColumn<PlayerInfo, Integer> playerScoreColumn;
     @FXML
     private TableColumn<PlayerInfo, String> gameIdColumn;
+
+    Stage board;
     ObservableList<PlayerInfo> playerData = FXCollections.observableArrayList();
 
     @FXML
@@ -104,6 +105,7 @@ public class Application extends javafx.application.Application {
                 controller.createGameBoard(parsedBoard, id);
 
                 Stage gameStage = new Stage();
+                board = gameStage;
                 gameStage.setTitle("Game Board");
                 gameStage.setScene(new Scene(root));
                 gameStage.show();
@@ -147,6 +149,18 @@ public class Application extends javafx.application.Application {
         playerData.setAll(players);
         playersTable.setItems(playerData);
     }
+
+
+
+    public void showGameOverDialog(String end, int p1, int p2, ClientHandler clientHandler) {
+        Controller controller = clientControllerMap.get(clientHandler);
+        controller.gameResultLabel.setText(end);
+        controller.yourScoreLabel.setText(String.valueOf(p1));
+        controller.opponentScoreLabel.setText(String.valueOf(p2));
+        controller.scoreBox.setVisible(true);
+
+    }
+
 
     public static void main(String[] args) {
         launch();

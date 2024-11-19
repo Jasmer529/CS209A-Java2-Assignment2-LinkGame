@@ -29,36 +29,20 @@ public class Game {
     }
 
 
-
-    public static int[][] SetupBoard(int row, int col) {
-
-        int[][] board = new int[row][col];
-        Random ran = new Random();
-
-        List<Integer> pairs = new ArrayList<>();
-        int numPairs = (row - 2) * (col - 2) / 2;
-        for (int i = 0; i < numPairs; i++) {
-            int randomNum = ran.nextInt(1, 12);
-            pairs.add(randomNum);
-            pairs.add(randomNum);
-        }
-
-        Collections.shuffle(pairs);
-
-        int index = 0;
-        for (int r = 1; r < row - 1; r++) {
-            for (int c = 1; c < col - 1; c++) {
-                board[r][c] = pairs.get(index);
-                index++;
-            }
-        }
-
-        return board;
-    }
-
     public void removeBlock(int row1, int col1, int row2, int col2) {
         board[row1][col1] = 0;
         board[row2][col2] = 0;
+    }
+
+    public boolean checkEnd(int[][] b){
+        for (int i = 0; i < b.length; i++) {
+            for (int i1 = 0; i1 < b[0].length; i1++) {
+                if(b[i][i1] != 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

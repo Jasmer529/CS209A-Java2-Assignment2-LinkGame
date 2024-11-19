@@ -47,11 +47,17 @@ public class ClientHandler {
                     currentGameId = gameId;
                     Platform.runLater(() -> app.loadGameBoard(boardData, this, currentGameId));
                 } else if (message.startsWith("UPDATE_BOARD")) {
-                    System.out.println(name);
                     String boardData = message.substring(12).trim();;
                     if (gameId.equals(currentGameId)) {
                         Platform.runLater(() -> app.updateGameBoard(boardData, this));
                     }
+                } else if(message.startsWith("GAME_OVER")){
+                    String result = message.substring(9).trim();
+                    String[] r = result.split(" ");
+                    String end = r[0];
+                    int p1 = Integer.parseInt(r[1]);
+                    int p2 = Integer.parseInt(r[2]);
+                    Platform.runLater(() -> app.showGameOverDialog(end, p1, p2, this));
                 }
             }
         } catch (IOException e) {

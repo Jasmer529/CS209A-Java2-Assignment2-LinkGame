@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
@@ -21,7 +22,14 @@ public class Controller {
     private Label boardOwnerLabel;
     @FXML
     public GridPane gameBoard;
-
+    @FXML
+    HBox scoreBox;
+    @FXML
+    Label yourScoreLabel;
+    @FXML
+    Label opponentScoreLabel;
+    @FXML
+    Label gameResultLabel;
     public Game game;
     public int point = 0;
     int[] position = new int[3];
@@ -122,7 +130,14 @@ public class Controller {
                 isYourTurn = false;
                 setYourTurn(false);
 
-                clientHandler.sendMessage("TURN_DONE");
+                if (game.checkEnd(game.board)) {
+                    clientHandler.sendMessage(game.gameId+"GAME_OVER"+ point);
+                    System.out.println("Game Over!");
+
+                } else {
+                    clientHandler.sendMessage("TURN_DONE");
+                }
+
                 System.out.println("Xiao Chu");
                 //drawLine(position[1], position[2], row, col);
             }
