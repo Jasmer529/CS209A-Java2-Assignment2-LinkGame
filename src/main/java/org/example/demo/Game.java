@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Game {
     int row;
@@ -112,5 +115,72 @@ public class Game {
         }
         return false;
     }
+
+    public List<Point> judgePath(int row1, int col1, int row2, int col2) {
+        List<Point> path = new ArrayList<>();
+
+        if ((board[row1][col1] != board[row2][col2]) || (row1 == row2 && col1 == col2)) {
+            return null; // 不匹配
+        }
+
+        // One line
+        if (isDirectlyConnected(row1, col1, row2, col2, board)) {
+            path.add(new Point(row1, col1));
+            path.add(new Point(row2, col2));
+            return path; // 返回直接路径
+        }
+
+        // Two lines
+        if ((row1 != row2) && (col1 != col2)) {
+            if (board[row1][col2] == 0 && isDirectlyConnected(row1, col1, row1, col2, board)
+                    && isDirectlyConnected(row1, col2, row2, col2, board)) {
+                path.add(new Point(row1, col1));
+                path.add(new Point(row1, col2));
+                path.add(new Point(row2, col2));
+                return path;
+            }
+            if (board[row2][col1] == 0 && isDirectlyConnected(row2, col2, row2, col1, board)
+                    && isDirectlyConnected(row2, col1, row1, col1, board)) {
+                path.add(new Point(row1, col1));
+                path.add(new Point(row2, col1));
+                path.add(new Point(row2, col2));
+                return path;
+            }
+        }
+
+        // Three lines
+        if (row1 != row2) {
+            for (int i = 0; i < board[0].length; i++) {
+                if (board[row1][i] == 0 && board[row2][i] == 0
+                        && isDirectlyConnected(row1, col1, row1, i, board)
+                        && isDirectlyConnected(row1, i, row2, i, board)
+                        && isDirectlyConnected(row2, col2, row2, i, board)) {
+                    path.add(new Point(row1, col1));
+                    path.add(new Point(row1, i));
+                    path.add(new Point(row2, i));
+                    path.add(new Point(row2, col2));
+                    return path;
+                }
+            }
+        }
+
+        if (col1 != col2) {
+            for (int j = 0; j < board.length; j++) {
+                if (board[j][col1] == 0 && board[j][col2] == 0
+                        && isDirectlyConnected(row1, col1, j, col1, board)
+                        && isDirectlyConnected(j, col1, j, col2, board)
+                        && isDirectlyConnected(row2, col2, j, col2, board)) {
+                    path.add(new Point(row1, col1));
+                    path.add(new Point(j, col1));
+                    path.add(new Point(j, col2));
+                    path.add(new Point(row2, col2));
+                    return path;
+                }
+            }
+        }
+
+        return null; // 无法连接
+    }
+
 
 }

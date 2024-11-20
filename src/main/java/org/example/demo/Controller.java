@@ -1,15 +1,21 @@
 package org.example.demo;
 
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.util.Duration;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Controller {
@@ -30,6 +36,13 @@ public class Controller {
     Label opponentScoreLabel;
     @FXML
     Label gameResultLabel;
+    @FXML
+    private Canvas gameCanvas;
+    @FXML
+    private Label failureLabel;
+
+    private GraphicsContext gc;
+
     public Game game;
     public int point = 0;
     int[] position = new int[3];
@@ -37,6 +50,9 @@ public class Controller {
     public ClientHandler clientHandler;
 
     boolean isYourTurn;
+    double cellWidth;
+    double cellHeight;
+
 
     public void setClientHandler(ClientHandler clientHandler) {
         this.clientHandler = clientHandler;
@@ -47,6 +63,10 @@ public class Controller {
 
     @FXML
     public void initialize() {
+        gc = gameCanvas.getGraphicsContext2D();
+        gameCanvas.widthProperty().bind(gameBoard.widthProperty());
+        gameCanvas.heightProperty().bind(gameBoard.heightProperty());
+        gameCanvas.setMouseTransparent(true);
 
     }
     public void updateScore(int increment) {
@@ -82,13 +102,15 @@ public class Controller {
                 button.setGraphic(imageView);
                 int finalRow = row;
                 int finalCol = col;
-                button.setOnAction( event -> handleButtonPress(finalRow, finalCol));
+                button.setOnAction(event -> handleButtonPress(finalRow, finalCol));
                 gameBoard.add(button, col, row);
             }
         }
         game = new Game(board, id);
         isYourTurn = true;
         clientHandler.setCurrentGameId(game.gameId);
+        cellWidth = 45;
+        cellHeight = 44;
     }
     public void UpdateBoard(int[][] board) {
         int r = board.length;
@@ -118,9 +140,11 @@ public class Controller {
             position[0] = 1;
         }else{
             boolean change = game.judge(position[1], position[2], row, col);
+            List<Point> pointList = game.judgePath(position[1], position[2], row, col);
             position[0] = 0;
             if(change && isYourTurn){
                 // TODO: handle the grid deletion logic
+                drawPath(pointList);
                 game.removeBlock(position[1], position[2], row, col);
                 this.updateScore(2);
                 UpdateBoard(game.board);
@@ -138,16 +162,52 @@ public class Controller {
                     clientHandler.sendMessage("TURN_DONE");
                 }
 
-                System.out.println("Xiao Chu");
-                //drawLine(position[1], position[2], row, col);
             }
             if(!change && isYourTurn){
+                showFailureMessage();
                 isYourTurn = false;
                 setYourTurn(false);
                 clientHandler.sendMessage("TURN_DONE");
             }
         }
     }
+
+    private void drawPath(List<Point> path) {
+        if (path == null || path.size() < 2) return;
+        gc.setStroke(Color.GREEN);
+        gc.setLineWidth(2);
+
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point p1 = path.get(i);
+            Point p2 = path.get(i + 1);
+
+            gc.strokeLine(
+                    (p1.y + 1.02) * (cellWidth),
+                    (p1.x + 1.02) * (cellHeight) - 20,
+                    (p2.y + 1.02) * (cellWidth),
+                    (p2.x + 1.02) * (cellHeight) - 20
+            );
+        }
+
+        // 2秒后清除
+        PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+        pause.setOnFinished(event -> clearCanvas());
+        pause.play();
+    }
+    private void showFailureMessage() {
+        failureLabel.setVisible(true);
+        System.out.println("meilianshang");
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(event -> failureLabel.setVisible(false));
+        pause.play();
+    }
+
+
+    private void clearCanvas() {
+        gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+    }
+
+
     private String serializeBoard(int[][] board) {
         StringBuilder sb = new StringBuilder();
         for (int[] row : board) {
