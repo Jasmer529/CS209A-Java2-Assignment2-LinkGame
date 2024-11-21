@@ -73,7 +73,6 @@ public class GameServer {
         }
     }
 
-
     private void startGame(PlayerHandler player1, PlayerHandler player2, String boardSize) {
 
         int rows = Integer.parseInt(boardSize.split("x")[0]);
@@ -108,8 +107,16 @@ public class GameServer {
         game.addPlayer(player1);
         game.addPlayer(player2);
 
-        player1.sendMessage(id+"START_GAME " + gameBoard);
         player2.sendMessage(id+"START_GAME " + gameBoard);
+
+        try {
+            // 延迟 500 毫秒（0.5 秒）
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        player1.sendMessage(id+"START_GAME " + gameBoard);
 
         System.out.println("Match found! Starting game for board size " + s + " "+ id);
         System.out.println(id + "START_GAME " + gameBoard);
@@ -199,6 +206,8 @@ public class GameServer {
         p1.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
     }
 
+
+
     private void broadcastPlayerStatus(List<PlayerHandler> l) {
         synchronized (allPlayers) {
             for (PlayerHandler player : l) {
@@ -231,6 +240,7 @@ public class GameServer {
         private BufferedReader in;
         public PlayerHandler opponent;
         private String boardSize;
+        private String currentBoard;
         Game game;
 
         int score;
@@ -258,11 +268,20 @@ public class GameServer {
                         String chicun = message.substring(5).trim();
                         startGame(this, opponent, chicun);
                     }
-//                    if (message.startsWith("PLAYER_STATUS")){
-//                        this.sendMessage(message);
-//                    }
+                    if(message.startsWith("CLOSE")){
+                        opponent.sendMessage("CLOSE");
+                        updatePlayerStatus2(this, "Leave", this.score);
+                        this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+                    }
 
-                        String id = message.substring(0,3);
+                    if(message.startsWith("RECONNECT")){
+                        //
+                        this.sendMessage("RECONNECT "+ this.currentBoard+" "+ this.score);
+                        updatePlayerStatus2(this, "In Game", 0);
+                        this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+                    }
+
+                    String id = message.substring(0,3);
                     message = message.replace(id,"");
                     if (message.startsWith("UPDATE_BOARD")) {
 //                        if (opponent != null) {
@@ -270,6 +289,8 @@ public class GameServer {
 //                        }
                         message = message.replace("UPDATE_BOARD","");
                         updateGameBoard(id, message);
+                        opponent.currentBoard = message;
+                        this.currentBoard = message;
                         score = score + 2;
                     }else if(message.startsWith("GAME_OVER")){
                         System.out.println(this.score);

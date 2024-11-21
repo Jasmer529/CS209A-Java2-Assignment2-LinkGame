@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class Application extends javafx.application.Application {
     @FXML
     private Button startButton;
     private Map<ClientHandler, Controller> clientControllerMap = new HashMap<>();
+    List<ClientHandler> handlers = new ArrayList<>();
 
     @FXML
     private TableView<PlayerInfo> playersTable;
@@ -39,6 +41,8 @@ public class Application extends javafx.application.Application {
     private TableColumn<PlayerInfo, Integer> playerScoreColumn;
     @FXML
     private TableColumn<PlayerInfo, String> gameIdColumn;
+    @FXML
+    private TableColumn<ClientHandler, Void> reconnectColumn;
 
     Stage board;
     ObservableList<PlayerInfo> playerData = FXCollections.observableArrayList();
@@ -51,6 +55,7 @@ public class Application extends javafx.application.Application {
         playerScoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
         gameIdColumn.setCellValueFactory(new PropertyValueFactory<>("gameId"));
         playersTable.setItems(playerData);
+        addButtonToReconnectColumn();
     }
 
 
@@ -61,6 +66,8 @@ public class Application extends javafx.application.Application {
         primaryStage.setTitle("Main Page");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+
+
     }
 
     @FXML
@@ -88,10 +95,11 @@ public class Application extends javafx.application.Application {
     public void startGame(int rows, int columns, String name) throws IOException {
         ClientHandler client = new ClientHandler(this, "127.0.0.1", 6666);
         client.name = name;
+        handlers.add(client);
         client.sendBoardSize(rows, columns);
     }
 
-    public void loadGameBoard(String boardData, ClientHandler client, String id) {
+    public void loadGameBoard(String boardData, ClientHandler client, String id, int point) {
         Platform.runLater(() -> {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
@@ -102,13 +110,16 @@ public class Application extends javafx.application.Application {
                 clientControllerMap.put(client, controller);
 
                 int[][] parsedBoard = parseBoardData(boardData);
-                controller.createGameBoard(parsedBoard, id);
+                controller.createGameBoard(parsedBoard, id, point);
 
                 Stage gameStage = new Stage();
                 board = gameStage;
                 gameStage.setTitle("Game Board");
                 gameStage.setScene(new Scene(root));
                 gameStage.show();
+
+                controller.closeChu();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -158,7 +169,40 @@ public class Application extends javafx.application.Application {
         controller.yourScoreLabel.setText(String.valueOf(p1));
         controller.opponentScoreLabel.setText(String.valueOf(p2));
         controller.scoreBox.setVisible(true);
+    }
 
+    public void showOneL(ClientHandler clientHandler) {
+        Controller controller = clientControllerMap.get(clientHandler);
+        controller.showOneLeave();
+    }
+
+    private void addButtonToReconnectColumn() {
+        reconnectColumn.setCellFactory(column -> new TableCell<>() {
+            private final Button reconnectButton = new Button("Reconnect");
+            {
+                reconnectButton.setOnAction(event -> {
+                    ClientHandler player = handlers.get(getIndex());
+                    System.out.println(getIndex());
+                    for (int i = 0; i < handlers.size(); i++) {
+                        ClientHandler h = handlers.get(i);
+                        System.out.println(h.name);
+                    }
+                    System.out.println("Reconnecting player: " + player.name);
+                    player.sendMessage("RECONNECT");
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(reconnectButton);
+                }
+            }
+        });
     }
 
 

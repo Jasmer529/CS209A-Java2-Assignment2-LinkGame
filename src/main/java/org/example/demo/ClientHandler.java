@@ -1,6 +1,8 @@
 package org.example.demo;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.*;
@@ -12,11 +14,13 @@ public class ClientHandler {
     private PrintWriter out;
     private Application app;
     private String currentGameId;
+
+    Socket socket;
     String name;
 
     public ClientHandler(Application app, String serverAddress, int serverPort) throws IOException {
         this.app = app;
-        Socket socket = new Socket(serverAddress, serverPort);
+        socket = new Socket(serverAddress, serverPort);
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -40,17 +44,28 @@ public class ClientHandler {
                     Platform.runLater(() -> app.updatePlayers(players));
 
                 }
+                if(message.startsWith("CLOSE")){
+                    Platform.runLater(() -> app.showOneL(this));
+                }
+                if (message.startsWith("RECONNECT")){
+                    String[] r = message.split(" ");
+                    String boardData = r[1];
+                    int point = Integer.parseInt(r[2]);
+                    Platform.runLater(() -> app.loadGameBoard(boardData, this, currentGameId, point));
+                }
+
                 String gameId = message.substring(0, 3);
                 message = message.substring(3).trim();
                 if (message.startsWith("START_GAME")) {
                     String boardData = message.substring(10).trim();;
                     currentGameId = gameId;
-                    Platform.runLater(() -> app.loadGameBoard(boardData, this, currentGameId));
+                    Platform.runLater(() -> app.loadGameBoard(boardData, this, currentGameId, 0));
                 } else if (message.startsWith("UPDATE_BOARD")) {
                     String boardData = message.substring(12).trim();;
                     if (gameId.equals(currentGameId)) {
                         Platform.runLater(() -> app.updateGameBoard(boardData, this));
                     }
+
                 } else if(message.startsWith("GAME_OVER")){
                     String result = message.substring(9).trim();
                     String[] r = result.split(" ");
@@ -61,9 +76,22 @@ public class ClientHandler {
                 }
             }
         } catch (IOException e) {
+            System.err.println("Connection to the server lost.");
+            handleServerDisconnection();
             e.printStackTrace();
         }
     }
+
+    private void handleServerDisconnection() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Server Disconnected");
+            alert.setHeaderText(null);
+            alert.setContentText("Connection to the server has been lost.");
+            alert.showAndWait();
+        });
+    }
+
     public static List<PlayerInfo> deserializePlayerList(String data) {
         List<PlayerInfo> players = new ArrayList<>();
         if (data == null || data.isEmpty()) {

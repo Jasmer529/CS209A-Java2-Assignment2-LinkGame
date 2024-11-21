@@ -6,6 +6,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -13,8 +15,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,7 +44,8 @@ public class Controller {
     private Canvas gameCanvas;
     @FXML
     private Label failureLabel;
-
+    @FXML
+    private Label leaveLabel;
     private GraphicsContext gc;
 
     public Game game;
@@ -85,7 +90,7 @@ public class Controller {
             currentPlayerLabel.setText("Opponent's Turn");
         }
     }
-    public void createGameBoard(int[][] board, String id) {
+    public void createGameBoard(int[][] board, String id, int p) {
         gameBoard.getChildren().clear();
         setPlayer();
         int r = board.length;
@@ -109,6 +114,8 @@ public class Controller {
         game = new Game(board, id);
         isYourTurn = true;
         clientHandler.setCurrentGameId(game.gameId);
+        scoreLabel.setText(String.valueOf(p));
+        point = p;
         cellWidth = 45;
         cellHeight = 44;
     }
@@ -150,7 +157,7 @@ public class Controller {
                 UpdateBoard(game.board);
 
                 String boardData = serializeBoard(game.board);
-                clientHandler.sendMessage(game.gameId+"UPDATE_BOARD " + boardData);
+                clientHandler.sendMessage(game.gameId+"UPDATE_BOARD" + boardData);
                 isYourTurn = false;
                 setYourTurn(false);
 
@@ -172,6 +179,16 @@ public class Controller {
         }
     }
 
+    public void closeChu(){
+        Stage stage = (Stage) scoreLabel.getScene().getWindow();
+        System.out.println(stage);
+        stage.setOnCloseRequest(event -> {
+            System.out.println("Window is closing...");
+            clientHandler.sendMessage("CLOSE");
+        });
+    }
+
+
     private void drawPath(List<Point> path) {
         if (path == null || path.size() < 2) return;
         gc.setStroke(Color.GREEN);
@@ -189,16 +206,21 @@ public class Controller {
             );
         }
 
-        // 2秒后清除
         PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
         pause.setOnFinished(event -> clearCanvas());
         pause.play();
     }
     private void showFailureMessage() {
         failureLabel.setVisible(true);
-        System.out.println("meilianshang");
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(event -> failureLabel.setVisible(false));
+        pause.play();
+    }
+
+    public void showOneLeave() {
+        leaveLabel.setVisible(true);
+        PauseTransition pause = new PauseTransition(Duration.seconds(5));
+        pause.setOnFinished(event -> leaveLabel.setVisible(false));
         pause.play();
     }
 

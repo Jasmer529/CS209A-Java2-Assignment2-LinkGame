@@ -27,6 +27,9 @@
     <Label fx:id="failureLabel" text="Connection failed!" visible="false" alignment="CENTER" style="-fx-text-fill: red;"/>
   </HBox>
 
+  <HBox spacing="10" alignment="CENTER">
+    <Label fx:id="leaveLabel" text="Your opponent has left" visible="false" alignment="CENTER" style="-fx-text-fill: red;"/>
+  </HBox>
 
   <StackPane>
     <GridPane fx:id="gameBoard" VBox.vgrow="ALWAYS" hgap="5" vgap="5">
