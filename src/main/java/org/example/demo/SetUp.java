@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class SetUp {
@@ -21,6 +23,8 @@ public class SetUp {
     @FXML
     private TextField NAME;
 
+    @FXML
+    private TextField PassWord;
     @FXML
     private Button confirmButton;  // 确认按钮
 
@@ -40,6 +44,7 @@ public class SetUp {
             int rows = Integer.parseInt(rowInput.getText());
             int cols = Integer.parseInt(colInput.getText());
             String name = NAME.getText();
+            String pw = PassWord.getText();
 
             // 判断行列数的乘积是否为奇数
             if (rows > 0 && cols > 0) {
@@ -49,20 +54,24 @@ public class SetUp {
                     errorMessageLabel.setStyle("-fx-text-fill: red;"); // 设置红色字体
                     return;  // 不再继续处理
                 } else {
-                    // 如果条件满足，启动游戏
-                    System.out.println("Rows: " + rows + ", Columns: " + cols);
+                    if(!validateLogin(name, pw)){
+                        errorMessageLabel.setText("Wrong Password.");
+                        errorMessageLabel.setStyle("-fx-text-fill: red;"); // 设置红色字体
+                    }else {
+                        // 如果条件满足，启动游戏
+                        System.out.println("Rows: " + rows + ", Columns: " + cols);
 
-                    // 调用 startGame 方法，处理可能抛出的IOException
-                    try {
-                        application.startGame(rows + 2, cols + 2, name); // 可能抛出IOException
-                    } catch (IOException e) {
-                        showAlert("Error starting the game: " + e.getMessage());
-                        e.printStackTrace();
+                        // 调用 startGame 方法，处理可能抛出的IOException
+                        try {
+                            application.startGame(rows + 2, cols + 2, name); // 可能抛出IOException
+                        } catch (IOException e) {
+                            showAlert("Error starting the game: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                        // 关闭当前窗口
+                        Stage stage = (Stage) rowInput.getScene().getWindow();
+                        stage.close();
                     }
-
-                    // 关闭当前窗口
-                    Stage stage = (Stage) rowInput.getScene().getWindow();
-                    stage.close();
                 }
             } else {
                 showAlert("Please enter positive numbers for rows and columns.");
@@ -71,6 +80,22 @@ public class SetUp {
             showAlert("Invalid input! Please enter integers.");
         }
     }
+
+    private boolean validateLogin(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     private void showAlert(String message) {
         Alert alert = new Alert(AlertType.ERROR);

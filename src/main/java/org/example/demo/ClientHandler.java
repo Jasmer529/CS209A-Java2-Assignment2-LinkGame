@@ -41,10 +41,14 @@ public class ClientHandler {
                 }
                 if (message.startsWith("PLAYER_STATUS")) {
                     String playerData = message.substring("PLAYER_STATUS ".length());
-                    System.out.println(playerData);
                     List<PlayerInfo> players = deserializePlayerList(playerData);
+                    app.playerInfos = players;
                     Platform.runLater(() -> app.updatePlayers(players));
-
+                }
+                if (message.startsWith("END")) {
+                    String playerData = message.substring("END ".length());
+                    List<PlayerInfo> players = deserializePlayerList(playerData);
+                    app.playerInfos = players;
                 }
                 if(message.startsWith("CLOSE")){
                     Platform.runLater(() -> app.showOneL(this));
@@ -74,12 +78,22 @@ public class ClientHandler {
                     String end = r[0];
                     int p1 = Integer.parseInt(r[1]);
                     int p2 = Integer.parseInt(r[2]);
+                    WriteHistory(this, end, p1);
                     Platform.runLater(() -> app.showGameOverDialog(end, p1, p2, this));
                 }
             }
         } catch (IOException e) {
             System.err.println("Connection to the server lost.");
             handleServerDisconnection();
+            e.printStackTrace();
+        }
+    }
+
+    public void WriteHistory(ClientHandler handler, String result, int p1){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("History.txt", true))) {
+            writer.write(handler.name + " " + "Result:"+result+"  Point:"+p1);
+            writer.newLine();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

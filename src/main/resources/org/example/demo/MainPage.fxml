@@ -18,6 +18,11 @@
         </columns>
     </TableView>
 
-    <!-- 按钮部分 -->
-    <Button text="Start Game" fx:id="startButton" layoutX="250" layoutY="300" onAction="#handleStartButtonClick" />
+    <HBox layoutX="120" layoutY="300" spacing="20" alignment="CENTER">
+        <Button text="Register" fx:id="rgButton" onAction="#handlergButtonClick" />
+        <Button text="Start Game" fx:id="startButton" onAction="#handleStartButtonClick" />
+        <Button text="Update" fx:id="updateButton" onAction="#handleUpdateButtonClick" />
+        <Button text="History" fx:id="historyButton" onAction="#handleHistoryButtonClick" />
+    </HBox>
+
 </AnchorPane>

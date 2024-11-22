@@ -14,7 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,6 +24,13 @@ public class Application extends javafx.application.Application {
 
     @FXML
     private Button startButton;
+    @FXML
+    private Button updateButton;
+    @FXML
+    private Button rgButton;
+
+    @FXML
+    private Button historyButton;
     private Map<ClientHandler, Controller> clientControllerMap = new HashMap<>();
     List<ClientHandler> handlers = new ArrayList<>();
 
@@ -44,6 +51,7 @@ public class Application extends javafx.application.Application {
 
     Stage board;
     ObservableList<PlayerInfo> playerData = FXCollections.observableArrayList();
+    List<PlayerInfo> playerInfos;
 
     @FXML
     public void initialize() {
@@ -66,7 +74,6 @@ public class Application extends javafx.application.Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
-
     }
 
     @FXML
@@ -75,6 +82,72 @@ public class Application extends javafx.application.Application {
             SetOriginUp(new Stage());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleUpdateButtonClick() {
+        System.out.println(playerInfos.size());
+        updatePlayers(playerInfos);
+    }
+
+    @FXML
+    private void handleHistoryButtonClick() {
+        Stage historyStage = new Stage();
+        historyStage.setTitle("History Viewer");
+        TextArea historyTextArea = new TextArea();
+        historyTextArea.setEditable(false); // 设置为只读
+
+        String filePath = "History.txt"; // 文件路径
+        StringBuilder content = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            content.append("Error reading file: ").append(e.getMessage());
+        }
+
+        historyTextArea.setText(content.toString());
+
+        VBox layout = new VBox(historyTextArea);
+        Scene scene = new Scene(layout, 400, 300);
+        historyStage.setScene(scene);
+
+        historyStage.initModality(Modality.APPLICATION_MODAL);
+        historyStage.show();
+    }
+
+    @FXML
+    private void handlergButtonClick() {
+        TextInputDialog usernameDialog = new TextInputDialog();
+        usernameDialog.setTitle("Register");
+        usernameDialog.setHeaderText("Enter your username:");
+        usernameDialog.setContentText("Username:");
+        Optional<String> usernameResult = usernameDialog.showAndWait();
+
+        if (usernameResult.isPresent()) {
+            String username = usernameResult.get();
+
+            TextInputDialog passwordDialog = new TextInputDialog();
+            passwordDialog.setTitle("Register");
+            passwordDialog.setHeaderText("Enter your password:");
+            passwordDialog.setContentText("Password:");
+            Optional<String> passwordResult = passwordDialog.showAndWait();
+
+            if (passwordResult.isPresent()) {
+                String password = passwordResult.get();
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt", true))) {
+                    writer.write(username + ":" + password);
+                    writer.newLine();
+                    System.out.println("User registered successfully!");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -190,27 +263,44 @@ public class Application extends javafx.application.Application {
 
     }
     private void handlePlayerSelection(PlayerInfo selectedPlayer) {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Login");
-        dialog.setHeaderText("Enter your name to start a game");
-        dialog.setContentText("Name:");
+        TextInputDialog usernameDialog = new TextInputDialog();
+        usernameDialog.setTitle("Login");
+        usernameDialog.setHeaderText("Enter your username to start a game");
+        usernameDialog.setContentText("Username:");
 
-        Optional<String> result = dialog.showAndWait();
-        String[] chicun = selectedPlayer.getBoardSize().split("x");
-        int row = Integer.parseInt(chicun[0]);
-        int col = Integer.parseInt(chicun[1]);
-        result.ifPresent(name -> {
-            try {
-                startGame(row + 2, col + 2, name);
-            } catch (IOException e) {
-                System.err.println("Error starting the game: " + e.getMessage());
-                e.printStackTrace();
+        Optional<String> usernameResult = usernameDialog.showAndWait();
+        if (usernameResult.isPresent()) {
+            String username = usernameResult.get();
+
+            // 弹出密码输入框
+            TextInputDialog passwordDialog = new TextInputDialog();
+            passwordDialog.setTitle("Login");
+            passwordDialog.setHeaderText("Enter your password:");
+            passwordDialog.setContentText("Password:");
+
+            Optional<String> passwordResult = passwordDialog.showAndWait();
+            if (passwordResult.isPresent()) {
+                String password = passwordResult.get();
+
+                // 验证用户名和密码
+                if (validateLogin(username, password)) {
+                    System.out.println("Login successful! Starting game...");
+                    String[] chicun = selectedPlayer.getBoardSize().split("x");
+                    int row = Integer.parseInt(chicun[0]);
+                    int col = Integer.parseInt(chicun[1]);
+                    try {
+                        startGame(row + 2, col + 2, username);
+                    } catch (IOException e) {
+                        System.err.println("Error starting the game: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Invalid username or password.");
+                    showAlert("The username or password is incorrect. Please try again.");
+                }
             }
-        });
-
+        }
     }
-
-
 
 
     private void addButtonToReconnectColumn() {
@@ -235,6 +325,30 @@ public class Application extends javafx.application.Application {
                 }
             }
         });
+    }
+
+    private boolean validateLogin(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("users.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Input Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {

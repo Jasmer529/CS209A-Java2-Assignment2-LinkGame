@@ -25,6 +25,11 @@
         <TextField fx:id="NAME" promptText="user" />
     </HBox>
 
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="PassWord:" />
+        <TextField fx:id="PassWord" promptText="passWord" />
+    </HBox>
+
     <Button fx:id="confirmButton" text="Confirm" onAction="#handleConfirm" />
     <Label fx:id="errorMessageLabel" text="" style="-fx-text-fill: red;" />
 </VBox>

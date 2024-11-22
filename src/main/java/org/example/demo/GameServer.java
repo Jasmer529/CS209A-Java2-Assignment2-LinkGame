@@ -3,6 +3,7 @@ package org.example.demo;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class GameServer {
@@ -12,6 +13,7 @@ public class GameServer {
     Map<PlayerHandler, Integer> pointMap = new HashMap<>();
     Map<String, Game> activeGames = new HashMap<>();
     List<PlayerInfo> allPlayers = new ArrayList<>();
+
     int count;
 
     public void start(int port) throws IOException {
@@ -195,6 +197,8 @@ public class GameServer {
         PlayerHandler p2 = game.getPlayers().get(1);
         int po1 = pointMap.get(p1);
         int po2 = pointMap.get(p2);
+        WriteHistory2(game.row, game.col, gameId);
+
         if(po1 > po2){
             p1.sendMessage(gameId + "GAME_OVER"+"WIN "+po1+" "+po2);
             p2.sendMessage(gameId + "GAME_OVER"+"LOSE "+po2+" "+po1);
@@ -232,6 +236,18 @@ public class GameServer {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+    public void WriteHistory2(int row, int col, String id){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("History.txt", true))) {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedTime = now.format(formatter);
+            String chicun = (row - 2) + "x" + (col - 2);
+            writer.write(formattedTime+" Game "+id+" of a "+chicun+" board");
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -274,11 +290,21 @@ public class GameServer {
                     }
                     if(message.startsWith("CLOSE")){
                         this.leave = true;
-                        System.out.println(this.getName() + " "+this.leave);
-                        System.out.println(opponent.getName() + " "+opponent.leave);
                         opponent.sendMessage("CLOSE");
                         updatePlayerStatus2(this, "Leave", this.score);
-                        this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+                        if(this.leave && opponent.leave) {
+                            System.out.println("Both players have left the game. Closing connections...");
+                            synchronized (allPlayers) {
+                                allPlayers.removeIf(playerInfo ->
+                                        playerInfo.getName().equals(this.getName()) ||
+                                                playerInfo.getName().equals(opponent.getName())
+                                );
+                            }
+                            this.sendMessage("END "+ serializePlayerList(allPlayers));
+                        }else {
+                            this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+                        }
+
 
                         try {
                             Thread.sleep(2000);
@@ -288,13 +314,13 @@ public class GameServer {
 
                         if(this.leave && opponent.leave){
                             System.out.println("Both players have left the game. Closing connections...");
+//                            synchronized (allPlayers) {
+//                                allPlayers.removeIf(playerInfo ->
+//                                        playerInfo.getName().equals(this.getName()) ||
+//                                                playerInfo.getName().equals(opponent.getName())
+//                                );
+//                            }
                             closeConnections();
-                            synchronized (allPlayers) {
-                                allPlayers.removeIf(playerInfo ->
-                                        playerInfo.getName().equals(this.getName()) ||
-                                                playerInfo.getName().equals(opponent.getName())
-                                );
-                            }
                             synchronized (activeGames) {
                                 activeGames.remove(game.gameId);
                             }
@@ -325,8 +351,6 @@ public class GameServer {
                         this.currentBoard = message;
                         score = score + 2;
                     }else if(message.startsWith("GAME_OVER")){
-                        System.out.println(this.score);
-                        System.out.println(opponent.score);
                         pointMap.put(this, this.score);
                         pointMap.put(opponent, opponent.score);
                         OverGame(id);
