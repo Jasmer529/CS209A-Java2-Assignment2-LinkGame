@@ -18,6 +18,8 @@ public class ClientHandler {
     Socket socket;
     String name;
 
+
+
     public ClientHandler(Application app, String serverAddress, int serverPort) throws IOException {
         this.app = app;
         socket = new Socket(serverAddress, serverPort);

@@ -59,11 +59,9 @@ public class Controller {
     double cellHeight;
 
 
+
     public void setClientHandler(ClientHandler clientHandler) {
         this.clientHandler = clientHandler;
-    }
-    public void setGame1(Game game1){
-        this.game = game1;
     }
 
     @FXML
@@ -164,7 +162,6 @@ public class Controller {
                 if (game.checkEnd(game.board)) {
                     clientHandler.sendMessage(game.gameId+"GAME_OVER"+ point);
                     System.out.println("Game Over!");
-
                 } else {
                     clientHandler.sendMessage("TURN_DONE");
                 }
@@ -184,7 +181,10 @@ public class Controller {
         System.out.println(stage);
         stage.setOnCloseRequest(event -> {
             System.out.println("Window is closing...");
+            //这里只有一个end会变成true
             clientHandler.sendMessage("CLOSE");
+
+
         });
     }
 

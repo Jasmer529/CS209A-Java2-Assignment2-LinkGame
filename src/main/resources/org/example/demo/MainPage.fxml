@@ -7,7 +7,6 @@
             fx:controller="org.example.demo.Application"
             prefHeight="400.0" prefWidth="600.0">
 
-    <!-- 表格部分 -->
     <TableView fx:id="playersTable" layoutX="50" layoutY="50" prefWidth="500" prefHeight="200">
         <columns>
             <TableColumn text="Player Name" fx:id="playerNameColumn" prefWidth="100" />

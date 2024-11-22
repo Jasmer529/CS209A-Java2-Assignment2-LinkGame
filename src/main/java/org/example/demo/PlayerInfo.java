@@ -6,6 +6,7 @@ public class PlayerInfo {
     private String status;
     private int score;
     private String gameId;
+    private boolean canChange;
 
     public PlayerInfo(String name, String boardsize, String status, int score, String gameId) {
         this.name = name;
@@ -13,8 +14,16 @@ public class PlayerInfo {
         this.status = status;
         this.score = score;
         this.gameId = gameId;
+        canChange = true;
     }
 
+    public boolean getCanChange(){
+        return canChange;
+    }
+
+    public void setCanChange(boolean canChange){
+        this.canChange = canChange;
+    }
     public String getName() {
         return name;
     }

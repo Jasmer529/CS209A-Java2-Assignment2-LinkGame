@@ -15,10 +15,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import javafx.scene.control.cell.PropertyValueFactory;
 
 
@@ -56,6 +54,7 @@ public class Application extends javafx.application.Application {
         gameIdColumn.setCellValueFactory(new PropertyValueFactory<>("gameId"));
         playersTable.setItems(playerData);
         addButtonToReconnectColumn();
+        addChoosePlayer();
     }
 
 
@@ -176,17 +175,50 @@ public class Application extends javafx.application.Application {
         controller.showOneLeave();
     }
 
+    public void addChoosePlayer(){
+        playersTable.setRowFactory(tv -> {
+            TableRow<PlayerInfo> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 1) {
+                    PlayerInfo selectedPlayer = row.getItem();
+                    System.out.println(selectedPlayer);
+                    handlePlayerSelection(selectedPlayer);
+                }
+            });
+            return row;
+        });
+
+    }
+    private void handlePlayerSelection(PlayerInfo selectedPlayer) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Login");
+        dialog.setHeaderText("Enter your name to start a game");
+        dialog.setContentText("Name:");
+
+        Optional<String> result = dialog.showAndWait();
+        String[] chicun = selectedPlayer.getBoardSize().split("x");
+        int row = Integer.parseInt(chicun[0]);
+        int col = Integer.parseInt(chicun[1]);
+        result.ifPresent(name -> {
+            try {
+                startGame(row + 2, col + 2, name);
+            } catch (IOException e) {
+                System.err.println("Error starting the game: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+    }
+
+
+
+
     private void addButtonToReconnectColumn() {
         reconnectColumn.setCellFactory(column -> new TableCell<>() {
             private final Button reconnectButton = new Button("Reconnect");
             {
                 reconnectButton.setOnAction(event -> {
                     ClientHandler player = handlers.get(getIndex());
-                    System.out.println(getIndex());
-                    for (int i = 0; i < handlers.size(); i++) {
-                        ClientHandler h = handlers.get(i);
-                        System.out.println(h.name);
-                    }
                     System.out.println("Reconnecting player: " + player.name);
                     player.sendMessage("RECONNECT");
                 });
@@ -204,7 +236,6 @@ public class Application extends javafx.application.Application {
             }
         });
     }
-
 
     public static void main(String[] args) {
         launch();

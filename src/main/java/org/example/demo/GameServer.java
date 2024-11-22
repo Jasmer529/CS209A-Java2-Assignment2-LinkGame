@@ -2,6 +2,7 @@ package org.example.demo;
 
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class GameServer {
@@ -51,7 +52,6 @@ public class GameServer {
                     int rows = Integer.parseInt(board.split("x")[0]);
                     int columns = Integer.parseInt(board.split("x")[1]);
                     String s = (rows - 2)+"x"+ (columns - 2);
-                    System.out.println(s);
                     info.setGameId(id);
                     info.setBoardsize(s);
                     info.setStatus(status);
@@ -65,8 +65,13 @@ public class GameServer {
         synchronized (allPlayers) {
             for (PlayerInfo info : allPlayers) {
                 if (info.getName().equals(player.getName())) {
-                    info.setScore(score);
-                    info.setStatus(status);
+                    if(info.getCanChange()){
+                        info.setScore(score);
+                        info.setStatus(status);
+                    }
+                    if(status.equals("Game over")){
+                        info.setCanChange(false);
+                    }
                     break;
                 }
             }
@@ -110,7 +115,6 @@ public class GameServer {
         player2.sendMessage(id+"START_GAME " + gameBoard);
 
         try {
-            // 延迟 500 毫秒（0.5 秒）
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -244,6 +248,7 @@ public class GameServer {
         Game game;
 
         int score;
+        boolean leave;
 
         public PlayerHandler(Socket socket) throws IOException {
             this.socket = socket;
@@ -262,24 +267,51 @@ public class GameServer {
                     }
                     if(message.equals("TURN_DONE")){
                         opponent.sendMessage("TURN_DONE");
-                        System.out.println(opponent);
                     }
                     if(message.startsWith("RESET")){
                         String chicun = message.substring(5).trim();
                         startGame(this, opponent, chicun);
                     }
                     if(message.startsWith("CLOSE")){
+                        this.leave = true;
+                        System.out.println(this.getName() + " "+this.leave);
+                        System.out.println(opponent.getName() + " "+opponent.leave);
                         opponent.sendMessage("CLOSE");
                         updatePlayerStatus2(this, "Leave", this.score);
                         this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
+
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if(this.leave && opponent.leave){
+                            System.out.println("Both players have left the game. Closing connections...");
+                            closeConnections();
+                            synchronized (allPlayers) {
+                                allPlayers.removeIf(playerInfo ->
+                                        playerInfo.getName().equals(this.getName()) ||
+                                                playerInfo.getName().equals(opponent.getName())
+                                );
+                            }
+                            synchronized (activeGames) {
+                                activeGames.remove(game.gameId);
+                            }
+                            logGameTermination(game.gameId, this.getName(), opponent.getName());
+                            break;
+
+                        }
                     }
 
                     if(message.startsWith("RECONNECT")){
                         //
+                        this.leave = false;
                         this.sendMessage("RECONNECT "+ this.currentBoard+" "+ this.score);
                         updatePlayerStatus2(this, "In Game", 0);
                         this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
                     }
+
 
                     String id = message.substring(0,3);
                     message = message.replace(id,"");
@@ -310,6 +342,29 @@ public class GameServer {
                 }
             }
         }
+
+        private void closeConnections() {
+            try {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+                if (opponent != null && opponent.socket != null && !opponent.socket.isClosed()) {
+                    opponent.socket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void logGameTermination(String gameId, String player1Name, String player2Name) {
+            try (FileWriter writer = new FileWriter("server.log", true)) {
+                writer.write(LocalDateTime.now() + ": Game " + gameId + " terminated. Players: "
+                        + player1Name + ", " + player2Name + " have left the game.\n");
+            } catch (IOException e) {
+                System.err.println("Failed to write log: " + e.getMessage());
+            }
+        }
+
 
         public void sendMessage(String message) {
             out.println(message);
