@@ -48,7 +48,8 @@ public class Application extends javafx.application.Application {
     private TableColumn<PlayerInfo, String> gameIdColumn;
     @FXML
     private TableColumn<ClientHandler, Void> reconnectColumn;
-
+    @FXML
+    private TableColumn<ClientHandler, Void> LeaveColumn;
     Stage board;
     ObservableList<PlayerInfo> playerData = FXCollections.observableArrayList();
     List<PlayerInfo> playerInfos;
@@ -62,6 +63,7 @@ public class Application extends javafx.application.Application {
         gameIdColumn.setCellValueFactory(new PropertyValueFactory<>("gameId"));
         playersTable.setItems(playerData);
         addButtonToReconnectColumn();
+        addButtonToLeaveColumn();
         addChoosePlayer();
     }
 
@@ -96,9 +98,9 @@ public class Application extends javafx.application.Application {
         Stage historyStage = new Stage();
         historyStage.setTitle("History Viewer");
         TextArea historyTextArea = new TextArea();
-        historyTextArea.setEditable(false); // 设置为只读
+        historyTextArea.setEditable(false);
 
-        String filePath = "History.txt"; // 文件路径
+        String filePath = "History.txt";
         StringBuilder content = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -313,15 +315,35 @@ public class Application extends javafx.application.Application {
                     player.sendMessage("RECONNECT");
                 });
             }
-
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-
                 if (empty) {
                     setGraphic(null);
                 } else {
                     setGraphic(reconnectButton);
+                }
+            }
+        });
+    }
+
+    private void addButtonToLeaveColumn() {
+        LeaveColumn.setCellFactory(column -> new TableCell<>() {
+            private final Button leaveButton = new Button("Leave");
+            {
+                leaveButton.setOnAction(event -> {
+                    ClientHandler player = handlers.get(getIndex());
+                    System.out.println(player.name+" has left");
+                    player.sendMessage("LEAVE");
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(leaveButton);
                 }
             }
         });

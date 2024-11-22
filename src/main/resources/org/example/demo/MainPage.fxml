@@ -10,10 +10,11 @@
     <TableView fx:id="playersTable" layoutX="50" layoutY="50" prefWidth="500" prefHeight="200">
         <columns>
             <TableColumn text="Player Name" fx:id="playerNameColumn" prefWidth="100" />
-            <TableColumn text="Board Size" fx:id="playerSizeColumn" prefWidth="100" />
+            <TableColumn text="BS" fx:id="playerSizeColumn" prefWidth="40" />
             <TableColumn text="Status" fx:id="playerStatusColumn" prefWidth="70" />
             <TableColumn text="Score" fx:id="playerScoreColumn" prefWidth="70"/>
             <TableColumn text="Game ID" fx:id="gameIdColumn" prefWidth="70"/>
+            <TableColumn text="Lv" fx:id="LeaveColumn" prefWidth="60"/>
             <TableColumn text="Re" fx:id="reconnectColumn" prefWidth="90"/>
         </columns>
     </TableView>

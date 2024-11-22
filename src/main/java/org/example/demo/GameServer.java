@@ -84,7 +84,17 @@ public class GameServer {
 
         int rows = Integer.parseInt(boardSize.split("x")[0]);
         int columns = Integer.parseInt(boardSize.split("x")[1]);
-        String gameBoard = generateGameBoard(rows, columns);
+        boolean temp = true;
+        String gameBoard = "";
+        if(rows < 6 || columns < 6){
+            while(temp){
+                gameBoard = generateGameBoard(rows, columns);
+                temp = hasUnsolvableDiagonal(StringToBoard(gameBoard));
+            }
+        }else {
+            gameBoard = generateGameBoard(rows, columns);
+        }
+
         String s = (rows - 2)+"x"+ (columns - 2);
 
         count++;
@@ -128,6 +138,26 @@ public class GameServer {
         System.out.println(id + "START_GAME " + gameBoard);
 
     }
+    public boolean hasUnsolvableDiagonal(int[][] board) {
+        int rows = board.length - 1;
+        int cols = board[0].length - 1;
+
+        for (int x = 1; x < rows - 1; x++) {
+            for (int y = 1; y < cols - 1; y++) {
+                int topLeft = board[x][y];
+                int topRight = board[x][y + 1];
+                int bottomLeft = board[x + 1][y];
+                int bottomRight = board[x + 1][y + 1];
+                if (topLeft == bottomRight && topRight == bottomLeft && topLeft != topRight) {
+                    System.out.println("有坏东西");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private String generateGameBoard(int rows, int columns) {
 
         int[][] board = new int[rows][columns];
@@ -328,6 +358,28 @@ public class GameServer {
                             break;
 
                         }
+                    }
+                    if(message.startsWith("LEAVE")){
+                        synchronized (allPlayers) {
+                            allPlayers.removeIf(playerInfo ->
+                                    playerInfo.getName().equals(this.getName())
+                            );
+                        }
+                        List<PlayerHandler> waitingPlayers = waitingPlayersMap.get(boardSize);
+
+                        if (waitingPlayers != null) {
+                            waitingPlayers.remove(this);
+                            if (waitingPlayers.isEmpty()) {
+                                waitingPlayersMap.remove(boardSize);
+                            }
+                        }
+                        this.sendMessage("END "+ serializePlayerList(allPlayers));
+//                        try {
+//                            Thread.sleep(2000);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        closeConnections();
                     }
 
                     if(message.startsWith("RECONNECT")){

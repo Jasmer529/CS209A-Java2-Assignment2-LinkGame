@@ -1,3 +1,6 @@
 2024-11-22 17:34:23 Game 001 of a 4x4 board
 lux Result:LOSE  Point:6
 jasmer Result:WIN  Point:10
+2024-11-22 18:34:11 Game 001 of a 4x4 board
+2 Result:PING  Point:8
+lux Result:PING  Point:8
