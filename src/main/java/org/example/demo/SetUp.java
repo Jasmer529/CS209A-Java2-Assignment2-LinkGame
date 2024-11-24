@@ -26,14 +26,13 @@ public class SetUp {
     @FXML
     private TextField PassWord;
     @FXML
-    private Button confirmButton;  // 确认按钮
+    private Button confirmButton;
 
     @FXML
-    private Label errorMessageLabel;  // 显示错误信息的Label
+    private Label errorMessageLabel;
 
     private Application application;
 
-    // 设置Application实例，方便调用startGame
     public void setApplication(Application application) {
         this.application = application;
     }
@@ -46,29 +45,23 @@ public class SetUp {
             String name = NAME.getText();
             String pw = PassWord.getText();
 
-            // 判断行列数的乘积是否为奇数
             if (rows > 0 && cols > 0) {
                 if ((rows * cols) % 2 != 0) {
-                    // 如果乘积是奇数，禁用Confirm按钮并显示提示信息
                     errorMessageLabel.setText("Rows * Columns cannot be odd. Please re-enter.");
-                    errorMessageLabel.setStyle("-fx-text-fill: red;"); // 设置红色字体
-                    return;  // 不再继续处理
+                    errorMessageLabel.setStyle("-fx-text-fill: red;");
+                    return;
                 } else {
                     if(!validateLogin(name, pw)){
                         errorMessageLabel.setText("Wrong Password.");
-                        errorMessageLabel.setStyle("-fx-text-fill: red;"); // 设置红色字体
+                        errorMessageLabel.setStyle("-fx-text-fill: red;");
                     }else {
-                        // 如果条件满足，启动游戏
                         System.out.println("Rows: " + rows + ", Columns: " + cols);
-
-                        // 调用 startGame 方法，处理可能抛出的IOException
                         try {
-                            application.startGame(rows + 2, cols + 2, name); // 可能抛出IOException
+                            application.startGame(rows + 2, cols + 2, name);
                         } catch (IOException e) {
                             showAlert("Error starting the game: " + e.getMessage());
                             e.printStackTrace();
                         }
-                        // 关闭当前窗口
                         Stage stage = (Stage) rowInput.getScene().getWindow();
                         stage.close();
                     }

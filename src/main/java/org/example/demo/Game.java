@@ -120,14 +120,14 @@ public class Game {
         List<Point> path = new ArrayList<>();
 
         if ((board[row1][col1] != board[row2][col2]) || (row1 == row2 && col1 == col2)) {
-            return null; // 不匹配
+            return null;
         }
 
         // One line
         if (isDirectlyConnected(row1, col1, row2, col2, board)) {
             path.add(new Point(row1, col1));
             path.add(new Point(row2, col2));
-            return path; // 返回直接路径
+            return path;
         }
 
         // Two lines
@@ -179,7 +179,7 @@ public class Game {
             }
         }
 
-        return null; // 无法连接
+        return null;
     }
 
 

@@ -181,7 +181,6 @@ public class Controller {
         System.out.println(stage);
         stage.setOnCloseRequest(event -> {
             System.out.println("Window is closing...");
-            //这里只有一个end会变成true
             clientHandler.sendMessage("CLOSE");
 
 

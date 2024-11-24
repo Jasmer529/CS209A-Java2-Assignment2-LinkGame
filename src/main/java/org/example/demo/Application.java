@@ -153,7 +153,6 @@ public class Application extends javafx.application.Application {
         }
     }
 
-    // 显示 SetupPage 的方法
     public void SetOriginUp(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("SetupPage.fxml"));
         VBox root = fxmlLoader.load();
@@ -275,7 +274,6 @@ public class Application extends javafx.application.Application {
         if (usernameResult.isPresent()) {
             String username = usernameResult.get();
 
-            // 弹出密码输入框
             TextInputDialog passwordDialog = new TextInputDialog();
             passwordDialog.setTitle("Login");
             passwordDialog.setHeaderText("Enter your password:");
@@ -285,7 +283,6 @@ public class Application extends javafx.application.Application {
             if (passwordResult.isPresent()) {
                 String password = passwordResult.get();
 
-                // 验证用户名和密码
                 if (validateLogin(username, password)) {
                     System.out.println("Login successful! Starting game...");
                     String[] chicun = selectedPlayer.getBoardSize().split("x");
