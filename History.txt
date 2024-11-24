@@ -4,3 +4,12 @@ jasmer Result:WIN  Point:10
 2024-11-22 18:34:11 Game 001 of a 4x4 board
 2 Result:PING  Point:8
 lux Result:PING  Point:8
+2024-11-23 16:45:47 Game 001 of a 4x4 board
+3 Result:PING  Point:8
+1 Result:PING  Point:8
+2024-11-24 16:00:33 Game 001 of a 4x4 board
+3 Result:PING  Point:8
+1 Result:PING  Point:8
+2024-11-24 16:01:53 Game 002 of a 4x3 board
+jasmer Result:WIN  Point:8
+2 Result:LOSE  Point:4

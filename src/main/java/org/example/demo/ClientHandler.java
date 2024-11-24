@@ -48,6 +48,7 @@ public class ClientHandler {
                 if (message.startsWith("END")) {
                     String playerData = message.substring("END ".length());
                     List<PlayerInfo> players = deserializePlayerList(playerData);
+                    Platform.runLater(() -> app.moveOut(this));
                     app.playerInfos = players;
                 }
                 if(message.startsWith("CLOSE")){

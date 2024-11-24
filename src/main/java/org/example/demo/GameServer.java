@@ -9,7 +9,6 @@ import java.util.*;
 public class GameServer {
     private ServerSocket serverSocket;
     private Map<String, List<PlayerHandler>> waitingPlayersMap = new HashMap<>();
-
     Map<PlayerHandler, Integer> pointMap = new HashMap<>();
     Map<String, Game> activeGames = new HashMap<>();
     List<PlayerInfo> allPlayers = new ArrayList<>();
@@ -149,7 +148,6 @@ public class GameServer {
                 int bottomLeft = board[x + 1][y];
                 int bottomRight = board[x + 1][y + 1];
                 if (topLeft == bottomRight && topRight == bottomLeft && topLeft != topRight) {
-                    System.out.println("有坏东西");
                     return true;
                 }
             }
@@ -331,6 +329,7 @@ public class GameServer {
                                 );
                             }
                             this.sendMessage("END "+ serializePlayerList(allPlayers));
+                            opponent.sendMessage("END "+ serializePlayerList(allPlayers));
                         }else {
                             this.sendMessage("PLAYER_STATUS " + serializePlayerList(allPlayers));
                         }
@@ -374,6 +373,7 @@ public class GameServer {
                             }
                         }
                         this.sendMessage("END "+ serializePlayerList(allPlayers));
+
 //                        try {
 //                            Thread.sleep(2000);
 //                        } catch (InterruptedException e) {

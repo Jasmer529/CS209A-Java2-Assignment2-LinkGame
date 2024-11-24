@@ -89,7 +89,7 @@ public class Application extends javafx.application.Application {
 
     @FXML
     private void handleUpdateButtonClick() {
-        System.out.println(playerInfos.size());
+        //System.out.println(playerInfos.size());
         updatePlayers(playerInfos);
     }
 
@@ -230,6 +230,7 @@ public class Application extends javafx.application.Application {
 
         });
     }
+
     public void updatePlayers(List<PlayerInfo> players) {
         playerData.setAll(players);
         playersTable.setItems(playerData);
@@ -333,6 +334,7 @@ public class Application extends javafx.application.Application {
             {
                 leaveButton.setOnAction(event -> {
                     ClientHandler player = handlers.get(getIndex());
+                    handlers.remove(getIndex());
                     System.out.println(player.name+" has left");
                     player.sendMessage("LEAVE");
                 });
@@ -371,6 +373,12 @@ public class Application extends javafx.application.Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void moveOut(ClientHandler clientHandler){
+        System.out.println(handlers.size());
+        handlers.remove(clientHandler);
+        System.out.println(handlers.size());
     }
 
     public static void main(String[] args) {

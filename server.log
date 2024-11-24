@@ -51,3 +51,16 @@
 2024-11-22T19:08:33.571021800: Game 001 terminated. Players: Thread-1, Thread-0 have left the game.
 2024-11-22T19:19:17.895401800: Game 032 terminated. Players: Thread-0, Thread-1 have left the game.
 2024-11-22T19:19:18.064425100: Game 032 terminated. Players: Thread-1, Thread-0 have left the game.
+2024-11-23T16:13:12.527797800: Game 001 terminated. Players: Thread-0, Thread-2 have left the game.
+2024-11-23T16:13:13.843317300: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-23T16:17:30.700645300: Game 001 terminated. Players: Thread-0, Thread-2 have left the game.
+2024-11-23T16:17:32.555760200: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-23T16:27:20.695117400: Game 001 terminated. Players: Thread-0, Thread-2 have left the game.
+2024-11-23T16:27:21.630044200: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-23T16:28:33.245212500: Game 002 terminated. Players: Thread-1, Thread-3 have left the game.
+2024-11-23T16:43:00.107238300: Game 001 terminated. Players: Thread-0, Thread-2 have left the game.
+2024-11-23T16:43:01.174657100: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-23T16:45:53.868606600: Game 001 terminated. Players: Thread-0, Thread-2 have left the game.
+2024-11-23T16:45:54.889009500: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-24T16:00:50.194762400: Game 001 terminated. Players: Thread-2, Thread-0 have left the game.
+2024-11-24T16:02:41.644166100: Game 002 terminated. Players: Thread-3, Thread-1 have left the game.
